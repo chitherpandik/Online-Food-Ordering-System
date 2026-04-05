@@ -1,0 +1,47 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Check order_items table",
+			"type": "shell",
+			"command": "mysql -u root -pChither@2006 -e \"USE project_db; SHOW TABLES LIKE 'order_items';\"",
+			"args": [],
+			"problemMatcher": []
+		},
+		{
+			"label": "Check order_items table (fixed)",
+			"type": "shell",
+			"command": "mysql -u root -pChither@2006 -e \"USE project_db; SHOW TABLES LIKE 'order_items';\"",
+			"args": [],
+			"problemMatcher": []
+		},
+		{
+			"label": "Check order_items table (one-line)",
+			"type": "shell",
+			"command": "mysql -u root -pChither@2006 -e \"USE project_db; SHOW TABLES;\"",
+			"args": [],
+			"problemMatcher": []
+		},
+		{
+			"label": "Run create_db.sql to recreate tables",
+			"type": "shell",
+			"command": "mysql -u root -pChither@2006 < create_db.sql",
+			"args": [],
+			"problemMatcher": []
+		},
+		{
+			"label": "Run create_db.sql with Get-Content",
+			"type": "shell",
+			"command": "Get-Content .\\create_db.sql | mysql -u root -pChither@2006",
+			"args": [],
+			"problemMatcher": []
+		},
+		{
+			"label": "Check order_items table exists",
+			"type": "shell",
+			"command": "mysql -u root -pChither@2006 -e \"USE project_db; SHOW TABLES;\"",
+			"args": [],
+			"problemMatcher": []
+		}
+	]
+}

@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Your Cart</title>
+  <style>
+    body{font-family:Arial, Helvetica, sans-serif; background:#f5f5f7; /* background image if available */ background-image:url('profilebg.jpg'); background-size:cover; background-position:center; background-repeat:no-repeat}
+    .wrap{max-width:900px;margin:32px auto;padding:18px;background:#fff;border-radius:10px}
+    h1{color:#ff5722;margin:0 0 8px}
+    .cart-list{display:flex;flex-direction:column;gap:12px;margin-top:12px}
+    .row{display:flex;gap:12px;align-items:center;padding:12px;border-radius:8px;border:1px solid #eee}
+    .row img{width:110px;height:80px;object-fit:cover;border-radius:6px}
+    .meta{flex:1}
+    .meta h4{margin:0 0 6px}
+    .meta p{margin:0;color:#666;font-size:14px}
+    .qty{display:flex;align-items:center;gap:8px}
+    .qty button{padding:6px 10px;border-radius:6px;border:none;background:#f2f2f2;cursor:pointer}
+    .price{font-weight:800;color:#222}
+    .total-row{display:flex;justify-content:space-between;align-items:center;padding:16px 0;border-top:1px solid #eee;margin-top:12px}
+    .place{background:#ff5722;color:#fff;padding:10px 18px;border-radius:8px;border:none;cursor:pointer;font-weight:700}
+    .empty{text-align:center;padding:36px;color:#666}
+    a.back{display:inline-block;margin-top:12px;color:#ff5722;text-decoration:none}
+    /* Confirmation modal */
+    .modal{position:fixed;inset:0;background:rgba(0,0,0,0.45);display:none;align-items:center;justify-content:center;padding:20px}
+    .modal.open{display:flex}
+    .modal-card{background:#fff;border-radius:10px;max-width:600px;width:100%;padding:18px}
+    .modal-card h3{margin:0 0 8px}
+    .modal-body{max-height:320px;overflow:auto;margin-bottom:12px}
+    .modal-actions{display:flex;justify-content:flex-end;gap:10px}
+    .btn-secondary{background:#eee;border:none;padding:8px 12px;border-radius:8px;cursor:pointer}
+    .btn-primary{background:#ff5722;color:#fff;border:none;padding:8px 14px;border-radius:8px;cursor:pointer}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+      <h1>Your Order</h1>
+      <a class="back" href="night.html">← Continue Shopping</a>
+    </div>
+
+    <div id="cartContainer">
+      <div class="empty">Loading cart…</div>
+    </div>
+  </div>
+
+  <script>
+    function getCart(){ try{ return JSON.parse(localStorage.getItem('cart')||'[]') }catch(e){ return [] } }
+    function saveCart(c){ localStorage.setItem('cart', JSON.stringify(c)) }
+
+    function renderCart(){
+      const container = document.getElementById('cartContainer');
+      const cart = getCart();
+      if(!cart || !cart.length){ container.innerHTML = '<div class="empty">Your cart is empty.<br><a href="night.html">Go to menu</a></div>'; return; }
+
+      let html = '<div class="cart-list">';
+      cart.forEach((it, idx)=>{
+        const subtotal = (Number(it.price)||0) * (Number(it.qty)||0);
+        // image element uses data-name so we can attempt multiple fallbacks after render
+        html += `<div class="row" data-idx="${idx}">`+
+                `<img data-name="${escapeHtml(it.name)}" src="${it.img||''}" alt="${escapeHtml(it.name)}">`+
+                `<div class="meta"><h4>${escapeHtml(it.name)}</h4><p>${escapeHtml(it.desc||'')}</p></div>`+
+                `<div style="text-align:right"><div class="price">₹${it.price}</div>`+
+                `<div class="qty" style="margin-top:8px">`+
+                `<button class="dec">−</button><span class="q">${it.qty}</span><button class="inc">+</button>`+
+                `</div><div style="margin-top:8px;color:#666">Subtotal:<div style="font-weight:800">₹${subtotal}</div></div></div>`+
+                `</div>`;
+      });
+      html += '</div>';
+
+      // total
+      const total = cart.reduce((s,it) => s + (Number(it.price)||0) * (Number(it.qty)||0), 0);
+      html += `<div class="total-row"><div><strong>Total</strong></div><div><strong>₹${total}</strong></div></div>`;
+      html += `<div style="display:flex;justify-content:flex-end;margin-top:12px"><button id="placeBtn" class="place">Place Order</button></div>`;
+
+      container.innerHTML = html;
+
+      // attach handlers
+      container.querySelectorAll('.row').forEach(r => {
+        const idx = Number(r.getAttribute('data-idx'));
+        const inc = r.querySelector('.inc');
+        const dec = r.querySelector('.dec');
+        inc.addEventListener('click', function(){ changeQty(idx, 1); });
+        dec.addEventListener('click', function(){ changeQty(idx, -1); });
+      });
+
+      // try loading menu images for items that don't have a valid src yet
+      container.querySelectorAll('img[data-name]').forEach(img => {
+        const name = img.getAttribute('data-name') || '';
+        const provided = img.getAttribute('src');
+        const candidates = buildImageCandidates(name);
+        // if an explicit img was provided in cart data, try it first
+        if(provided) candidates.unshift(provided);
+        loadSequentialImage(img, candidates);
+      });
+
+      const place = document.getElementById('placeBtn');
+      if(place) place.addEventListener('click', placeOrder);
+    }
+
+    function changeQty(idx, delta){
+      const cart = getCart();
+      if(!cart[idx]) return; cart[idx].qty = (Number(cart[idx].qty)||0) + delta;
+      if(cart[idx].qty <= 0) cart.splice(idx,1);
+      saveCart(cart); renderCart();
+    }
+
+    // helpers to attempt loading multiple image candidates for a menu item
+    function slugify(s){ return (s||'').toString().toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,''); }
+    function escapeHtml(str){ return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;'); }
+    function buildImageCandidates(name){
+      const base = slugify(name);
+      const exts = ['.jpg', '.png', '.jpeg'];
+      const folders = ['','bg/','afternoon non/','afternoon veg/','Morning/','night non/','night veg/'];
+      const out = [];
+      folders.forEach(f => exts.forEach(e => out.push(f + base + e)));
+      // also try raw base (no slug) and a generic default last
+      out.push(name + '.jpg', name + '.png', 'night non/f5.jpg');
+      return out;
+    }
+
+    function loadSequentialImage(imgEl, candidates){
+      let i = 0;
+      function tryNext(){
+        if(i >= candidates.length){ imgEl.src = 'night non/f5.jpg'; return; }
+        const url = candidates[i++];
+        imgEl.onerror = tryNext;
+        imgEl.src = url;
+      }
+      tryNext();
+    }
+
+    function placeOrder(){
+      const cart = getCart();
+      if(!cart.length) return alert('Cart is empty');
+      const total = cart.reduce((s,it)=> s + (Number(it.price)||0) * (Number(it.qty)||0), 0);
+      const modal = document.getElementById('confirmModal');
+      const body = modal.querySelector('.modal-body');
+      body.innerHTML = '';
+      cart.forEach((it, i)=>{
+        const row = document.createElement('div');
+        row.style.display = 'flex'; row.style.justifyContent = 'space-between'; row.style.padding = '6px 0';
+        row.innerHTML = `<div>${i+1}. ${it.name} x${it.qty}</div><div>₹${(Number(it.price)||0) * (Number(it.qty)||0)}</div>`;
+        body.appendChild(row);
+      });
+      modal.querySelector('.modal-total').textContent = '₹' + total;
+      modal.classList.add('open');
+    }
+
+    // enhance items with image/desc fallback when adding from menu
+    // ensure items in cart have .img and .desc when available in DOM
+    (function normalizeCart(){
+      const cart = getCart();
+      if(!cart || !cart.length) { renderCart(); return; }
+      // try to enrich items from DOM menus
+      cart.forEach(function(it){
+        try{
+          if(!it.img){
+            const selector = '[data-name="'+it.name.replace(/"/g,'\\"')+'"]';
+            const node = document.querySelector(selector);
+            if(node){ const img = node.querySelector('img'); if(img) it.img = img.getAttribute('src'); const desc = node.querySelector('.desc'); if(desc) it.desc = desc.textContent; }
+          }
+        }catch(e){}
+      });
+      saveCart(cart); renderCart();
+    })();
+    // modal handlers
+    document.addEventListener('click', function(e){
+      const modal = document.getElementById('confirmModal');
+      if(!modal) return;
+      if(e.target && e.target.id === 'confirmCancel'){
+        modal.classList.remove('open');
+      }
+      if(e.target && e.target.id === 'confirmPlace'){
+        // Redirect to payment page to complete payment flow
+        modal.classList.remove('open');
+        window.location.href = 'payment.html';
+      }
+      if(e.target && e.target.classList && e.target.classList.contains('modal')){
+        e.target.classList.remove('open');
+      }
+    });
+  </script>
+  <div id="confirmModal" class="modal" role="dialog" aria-hidden="true">
+    <div class="modal-card">
+      <h3>Confirm your order</h3>
+      <div class="modal-body">...</div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+        <div><strong>Total: <span class="modal-total">₹0</span></strong></div>
+        <div class="modal-actions"><button id="confirmCancel" class="btn-secondary">Cancel</button><button id="confirmPlace" class="btn-primary">Confirm Order</button></div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

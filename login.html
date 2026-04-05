@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Login</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: url("bg.jpg") no-repeat center center fixed;
+            background-size: cover;
+        }
+        .box {
+            width: 320px;
+            margin: 120px auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 0 10px black;
+        }
+        h2 {
+            text-align: center;
+            color: #ff5722;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin: 10px 0;
+        }
+        button {
+            width: 100%;
+            padding: 8px;
+            background: #ff5722;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        a {
+            color: #ff5722;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h2>Login</h2>
+    <form id="loginForm">
+        <input id="loginEmail" name="email" type="email" placeholder="Email" required>
+        <input id="loginPassword" name="password" type="password" placeholder="Password" required>
+        <button type="submit">Login</button>
+    </form>
+    <p style="text-align:center;">
+        New user? <a href="register.html">Register</a>
+    </p>
+    <p style="text-align:center;margin-top:8px;">
+        <a href="#" id="forgotLink">Forgot password?</a>
+    </p>
+    <div id="forgotBox" style="display:none;margin-top:10px;">
+        <form id="forgotForm">
+            <input id="forgotEmail" name="email" type="email" placeholder="Enter your email" required>
+            <input id="forgotNewPassword" name="newPassword" type="password" placeholder="New password" required minlength="6">
+            <input id="forgotConfirmPassword" name="confirmPassword" type="password" placeholder="Confirm password" required minlength="6">
+            <button type="submit">Reset password</button>
+            <p style="text-align:center;margin-top:8px;"><a href="#" id="cancelForgot">Cancel</a></p>
+        </form>
+    </div>
+</div>
+
+<script>
+// Show verified message when redirected from /verify
+(function(){
+    try{
+        const params = new URLSearchParams(window.location.search);
+        if(params.get('verified') === '1'){
+            alert('Email verified successfully. You may now log in.');
+        }
+    }catch(e){ }
+})();
+
+document.getElementById('loginForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+    try{
+        const resp = await fetch('/api/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password })
+        });
+        const data = await resp.json();
+        if(resp.ok){
+            // simple client-side session flag (sessionStorage clears on tab close)
+            sessionStorage.setItem('loggedIn', 'true');
+            sessionStorage.setItem('userFullName', data.fullname || '');
+            sessionStorage.setItem('userEmail', email);
+            // After login, go to home page per requirement
+            window.location.href = 'home.html';
+        } else if(resp.status === 403 && data && typeof data.error === 'string' && data.error.toLowerCase().includes('email not verified')){
+            // Offer to resend verification link
+            const again = confirm('Email not verified. Would you like to resend the verification email?');
+            if(again){
+                try{
+                    const r = await fetch('/api/resend-verification', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email })
+                    });
+                    const d = await r.json();
+                    if(r.ok){
+                        if(d.verifyUrl){
+                            const openNow = confirm('A verification link was returned by the server. Open it now?');
+                            if(openNow) window.open(d.verifyUrl, '_blank');
+                            else alert(d.message || 'Verification link available. Check server logs.');
+                        } else {
+                            alert(d.message || 'Verification email sent if account exists.');
+                        }
+                    } else {
+                        alert(d.error || 'Unable to resend verification');
+                    }
+                }catch(e){ console.error(e); alert('Network error while resending verification'); }
+            }
+        } else {
+            alert(data.error || 'Login failed');
+        }
+    } catch(err){
+        console.error(err);
+        alert('Network or server error');
+    }
+});
+
+// Forgot password handlers
+document.getElementById('forgotLink').addEventListener('click', function(e){
+    e.preventDefault();
+    document.getElementById('forgotBox').style.display = 'block';
+});
+document.getElementById('cancelForgot').addEventListener('click', function(e){
+    e.preventDefault();
+    document.getElementById('forgotBox').style.display = 'none';
+});
+
+document.getElementById('forgotForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    const email = document.getElementById('forgotEmail').value.trim();
+    const pw = document.getElementById('forgotNewPassword').value;
+    const confirm = document.getElementById('forgotConfirmPassword').value;
+    if(!email){ alert('Please enter your email'); return; }
+    if(pw !== confirm){ alert('Passwords do not match'); return; }
+    if(pw.length < 6){ alert('Password must be at least 6 characters'); return; }
+    try{
+        const resp = await fetch('/api/reset-password-simple', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, password: pw })
+        });
+        const data = await resp.json();
+        if(resp.ok){
+            alert(data.message || 'If an account exists, the password was reset.');
+            document.getElementById('forgotBox').style.display = 'none';
+        } else {
+            alert(data.error || 'Request failed');
+        }
+    } catch(err){ console.error(err); alert('Network or server error'); }
+});
+</script>
+
+</body>
+</html>

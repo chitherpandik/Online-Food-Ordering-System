@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>About Us - Online Food Ordering</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body{font-family:Arial;margin:0;background:#fafafa;color:#333}
+    header{background:#fff;box-shadow:0 1px 4px rgba(0,0,0,0.08);padding:12px 20px;display:flex;align-items:center;justify-content:space-between}
+    .brand{font-weight:800;color:#ff5722}
+    .container{max-width:900px;margin:28px auto;padding:18px}
+    .card{background:#fff;padding:20px;border-radius:8px;box-shadow:0 1px 6px rgba(0,0,0,0.04)}
+    h1{margin-top:0}
+    pre{white-space:pre-wrap;font-family:inherit}
+    a.cta{display:inline-block;margin-top:14px;padding:8px 12px;background:#ff5722;color:#fff;text-decoration:none;border-radius:6px}
+  </style>
+</head>
+<body id="aboutBody">
+  <header>
+    <div class="brand">🍽 Online Food Ordering</div>
+  </header>
+
+  <div class="container">
+    <div class="card">
+      <h1>🏠 About Us</h1>
+      <p>Welcome to our Online Food Ordering System, a simple and user-friendly platform designed to make food ordering easy, fast, and convenient for everyone.</p>
+
+      <p>Our system connects customers with local restaurants and home kitchens, allowing users to browse different food menus, select their favorite dishes, and place orders online from the comfort of their homes. The main goal of this project is to reduce manual ordering, save time, and improve the overall food ordering experience.</p>
+
+      <h3>🎯 Our Mission</h3>
+      <p>Our mission is to provide a reliable and efficient online food ordering platform that helps customers enjoy delicious meals without waiting in queues or making phone calls. We aim to support local food providers by giving them a digital platform to reach more customers.</p>
+
+      <h3>🍽️ What We Offer</h3>
+      <ul>
+        <li>Easy user registration and login</li>
+        <li>Well-organized food menus (Morning, Afternoon, Evening)</li>
+        <li>Clear food images and descriptions</li>
+        <li>Simple and quick ordering process</li>
+        <li>Secure user access and order management</li>
+      </ul>
+
+      <h3>💡 Why Choose Our System?</h3>
+      <ul>
+        <li>User-friendly interface</li>
+        <li>Fast and easy navigation</li>
+        <li>Reduces human errors in order taking</li>
+        <li>Saves time for both customers and food providers</li>
+      </ul>
+
+      <h3>🛠️ Technology Used</h3>
+      <p>This system is developed using modern web technologies such as HTML, CSS, and JavaScript for the frontend. Backend integration (Java / PHP / Node.js) and a database are used to store user and order details.</p>
+
+      <h3>🚀 Future Scope</h3>
+      <p>Future enhancements may include online payment integration, real-time order tracking, mobile applications, and dashboards for restaurants and delivery partners.</p>
+
+      <h3>✨ Conclusion</h3>
+      <p>The Online Food Ordering System is designed to make food ordering simple, smart, and efficient. It is suitable for customers, restaurants, and students learning web development, and it demonstrates how technology can improve everyday services.</p>
+
+      <a class="cta" href="home.html">Back to Home</a>
+    </div>
+  </div>
+
+  <footer style="text-align:center;padding:14px;color:#777">© 2025 Online Food Ordering System</footer>
+
+<script>
+  // Cycle page background images like index.html
+  (function(){
+    const previews = [
+      { bg: 'bg.jpg' },
+      { bg: 'morning.jpg' },
+      { bg: 'Afternoon.jpg' },
+      { bg: 'night1.jpg' }
+    ];
+    let idx = 0;
+    const body = document.getElementById('aboutBody') || document.body;
+    function apply(i){
+      const p = previews[i] || previews[0];
+      body.style.backgroundImage = `url('${p.bg}')`;
+      body.style.backgroundSize = 'cover';
+      body.style.backgroundPosition = 'center';
+      body.style.backgroundRepeat = 'no-repeat';
+    }
+    // initial
+    apply(idx);
+    // cycle every 10s
+    setInterval(()=>{ idx = (idx+1) % previews.length; apply(idx); }, 10000);
+  })();
+</script>
+
+</body>
+</html>

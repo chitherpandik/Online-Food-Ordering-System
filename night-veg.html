@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Night - VEG Menu</title>
+  <style>
+    body { font-family: Arial; background: url("bg.jpg") no-repeat center center fixed; background-size: cover; }
+    .wrap { max-width: 900px; margin: 60px auto; background: rgba(255,255,255,0.96); padding: 20px; border-radius: 8px; }
+    h1 { color: #ff5722; text-align:center }
+    .items { display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:16px; margin-top:18px }
+    .item{ background:#fff; padding:12px; border-radius:8px; box-shadow:0 0 8px #ccc; text-align:center }
+    .item img{ width:100%; height:140px; object-fit:cover; border-radius:6px }
+    .price{ margin-top:8px;font-weight:700;color:#333 }
+    .add-now { background:#ff5722; color:#fff; border:none; padding:8px 12px; border-radius:6px; cursor:pointer; text-transform:uppercase }
+    .qty-controls { display:none; align-items:center; gap:8px }
+    .qty-btn { padding:6px 10px; border-radius:6px; border:none; background:#eee; cursor:pointer }
+    .open{ display:inline-block; margin-top:10px; padding:8px 12px; background:#ff5722; color:#fff; border-radius:6px; text-decoration:none }
+    .back{ display:block; width:200px; margin:22px auto 0; padding:10px; text-align:center; background:#ff5722; color:#fff; border-radius:6px; text-decoration:none }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
+    <h1>Night — VEG Menu</h1>
+    <a id="cartLink" href="#" style="text-decoration:none;color:#ff5722;font-weight:600">Cart (<span id="cartCount">0</span>)</a>
+  </div>
+  <p style="text-align:center;color:#555">Choose from our vegetarian dinner options.</p>
+
+  <div class="items">
+    <div class="item" data-name="Chapati" data-price="20">
+      <img src="night veg/f1.jpg" alt="Chapati">
+      <h3>Chapati</h3>
+      <p>Soft whole wheat flatbread (per piece).</p>
+      <div class="price">Price: ₹20</div>
+      <div style="margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
+        <button type="button" class="add-now">ADD TO CART</button>
+        <div class="qty-controls" style="display:none;align-items:center;gap:8px;">
+          <button type="button" class="qty-btn" data-action="decrement">−</button>
+          <span class="qty">0</span>
+          <button type="button" class="qty-btn" data-action="increment">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="item" data-name="Parotta" data-price="40">
+      <img src="night veg/f2.jpg" alt="Parotta">
+      <h3>Parotta</h3>
+      <p>Flaky layered flatbread, served hot.</p>
+      <div class="price">Price: ₹40</div>
+      <div style="margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
+        <button type="button" class="add-now">ADD TO CART</button>
+        <div class="qty-controls" style="display:none;align-items:center;gap:8px;">
+          <button type="button" class="qty-btn" data-action="decrement">−</button>
+          <span class="qty">0</span>
+          <button type="button" class="qty-btn" data-action="increment">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="item" data-name="Vegetable Kurma" data-price="100">
+      <img src="night veg/f3.jpg" alt="Vegetable Kurma">
+      <h3>Vegetable Kurma</h3>
+      <p>Mixed vegetables cooked in a creamy coconut gravy.</p>
+      <div class="price">Price: ₹100</div>
+      <div style="margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
+        <button type="button" class="add-now">ADD TO CART</button>
+        <div class="qty-controls" style="display:none;align-items:center;gap:8px;">
+          <button type="button" class="qty-btn" data-action="decrement">−</button>
+          <span class="qty">0</span>
+          <button type="button" class="qty-btn" data-action="increment">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="item" data-name="Veg Salna" data-price="90">
+      <img src="night veg/f4.jpg" alt="Veg Salna">
+      <h3>Veg Salna</h3>
+      <p>Spiced vegetable salna — a great pairing for parotta.</p>
+      <div class="price">Price: ₹90</div>
+      <div style="margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
+        <button type="button" class="add-now">ADD TO CART</button>
+        <div class="qty-controls" style="display:none;align-items:center;gap:8px;">
+          <button type="button" class="qty-btn" data-action="decrement">−</button>
+          <span class="qty">0</span>
+          <button type="button" class="qty-btn" data-action="increment">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="item" data-name="Idiyappam" data-price="60">
+      <img src="night veg/f5.jpg" alt="Idiyappam">
+      <h3>Idiyappam</h3>
+      <p>String hoppers made from rice flour — soft and light.</p>
+      <div class="price">Price: ₹60</div>
+      <div style="margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
+        <button type="button" class="add-now">ADD TO CART</button>
+        <div class="qty-controls" style="display:none;align-items:center;gap:8px;">
+          <button type="button" class="qty-btn" data-action="decrement">−</button>
+          <span class="qty">0</span>
+          <button type="button" class="qty-btn" data-action="increment">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="item" data-name="Veg Stew" data-price="120">
+      <img src="night veg/f6.jpg" alt="Veg Stew">
+      <h3>Veg Stew</h3>
+      <p>Light coconut-based vegetable stew, great with idiyappam.</p>
+      <div class="price">Price: ₹120</div>
+      <div style="margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
+        <button type="button" class="add-now">ADD TO CART</button>
+        <div class="qty-controls" style="display:none;align-items:center;gap:8px;">
+          <button type="button" class="qty-btn" data-action="decrement">−</button>
+          <span class="qty">0</span>
+          <button type="button" class="qty-btn" data-action="increment">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="item" data-name="Veg Fried Rice" data-price="100">
+      <img src="afternoon veg/f9.jpg" alt="Veg Fried Rice">
+      <h3>Veg Fried Rice</h3>
+      <p>Fried rice loaded with seasonal vegetables.</p>
+      <div class="price">Price: ₹100</div>
+      <div style="margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
+        <button type="button" class="add-now">ADD TO CART</button>
+        <div class="qty-controls" style="display:none;align-items:center;gap:8px;">
+          <button type="button" class="qty-btn" data-action="decrement">−</button>
+          <span class="qty">0</span>
+          <button type="button" class="qty-btn" data-action="increment">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="item" data-name="Veg Noodles" data-price="100">
+      <img src="night veg/f8.jpg" alt="Veg Noodles">
+      <h3>Veg Noodles</h3>
+      <p>Stir-fried noodles with crisp vegetables.</p>
+      <div class="price">Price: ₹100</div>
+      <div style="margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
+        <button type="button" class="add-now">ADD TO CART</button>
+        <div class="qty-controls" style="display:none;align-items:center;gap:8px;">
+          <button type="button" class="qty-btn" data-action="decrement">−</button>
+          <span class="qty">0</span>
+          <button type="button" class="qty-btn" data-action="increment">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="item" data-name="Paneer Butter Masala" data-price="150">
+      <img src="night veg/f9.jpg" alt="Paneer Butter Masala">
+      <h3>Paneer Butter Masala</h3>
+      <p>Cubes of paneer in rich tomato-butter gravy.</p>
+      <div class="price">Price: ₹150</div>
+      <div style="margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
+        <button type="button" class="add-now">ADD TO CART</button>
+        <div class="qty-controls" style="display:none;align-items:center;gap:8px;">
+          <button type="button" class="qty-btn" data-action="decrement">−</button>
+          <span class="qty">0</span>
+          <button type="button" class="qty-btn" data-action="increment">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="item" data-name="Mushroom Curry" data-price="130">
+      <img src="night veg/f11.jpg" alt="Mushroom Curry">
+      <h3>Mushroom Curry</h3>
+      <p>Button mushrooms cooked in a spiced gravy.</p>
+      <div class="price">Price: ₹130</div>
+      <div style="margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
+        <button type="button" class="add-now">ADD TO CART</button>
+        <div class="qty-controls" style="display:none;align-items:center;gap:8px;">
+          <button type="button" class="qty-btn" data-action="decrement">−</button>
+          <span class="qty">0</span>
+          <button type="button" class="qty-btn" data-action="increment">+</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="item" data-name="Paneer Fried Rice" data-price="130">
+      <img src="afternoon veg/f8.jpg" alt="Paneer Fried Rice">
+      <h3>Paneer Fried Rice</h3>
+      <p>Fried rice tossed with paneer and vegetables.</p>
+      <div class="price">Price: ₹130</div>
+      <div style="margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;">
+        <button type="button" class="add-now">ADD TO CART</button>
+        <div class="qty-controls" style="display:none;align-items:center;gap:8px;">
+          <button type="button" class="qty-btn" data-action="decrement">−</button>
+          <span class="qty">0</span>
+          <button type="button" class="qty-btn" data-action="increment">+</button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <a class="back" href="night.html">← Back to Night</a>
+</div>
+
+<script>
+  function getCart(){ try{ return JSON.parse(localStorage.getItem('cart')||'[]') }catch(e){ return [] } }
+  function saveCart(c){ localStorage.setItem('cart', JSON.stringify(c)) }
+  function findIndex(cart, name){ return cart.findIndex(i => i.name === name); }
+  function updateCartCount(){ const c = getCart(); const totalQty = c.reduce((s,it)=> s + (it.qty||0), 0); const el = document.getElementById('cartCount'); if(el) el.textContent = totalQty; }
+  function updateCardQuantities(){ const cart = getCart(); document.querySelectorAll('.item').forEach(card => { const name = card.getAttribute('data-name') || card.querySelector('h3').textContent; const idx = findIndex(cart, name); const qtySpan = card.querySelector('.qty'); const qtyControls = card.querySelector('.qty-controls'); const addNow = card.querySelector('.add-now'); const qty = idx === -1 ? 0 : (cart[idx].qty || 0); if(qtySpan) qtySpan.textContent = String(qty); if(qty > 0){ if(qtyControls) qtyControls.style.display = 'flex'; if(addNow) addNow.style.display = 'none'; } else { if(qtyControls) qtyControls.style.display = 'none'; if(addNow) addNow.style.display = 'inline-block'; } }); }
+
+  document.addEventListener('click', function(e){
+    if(e.target && e.target.classList && e.target.classList.contains('qty-btn')){
+      const action = e.target.getAttribute('data-action');
+      const card = e.target.closest('.item');
+      const name = card.getAttribute('data-name') || card.querySelector('h3').textContent;
+      const price = Number(card.getAttribute('data-price') || 0);
+      const img = (card.querySelector('img') && card.querySelector('img').getAttribute('src')) || '';
+      const desc = (card.querySelector('p') && card.querySelector('p').textContent) || '';
+      const cart = getCart();
+      const idx = findIndex(cart, name);
+
+      if(action === 'increment'){
+        if(idx === -1){ cart.push({ name, price, qty: 1, img, desc }); }
+        else { cart[idx].qty = (cart[idx].qty || 0) + 1; }
+      } else if(action === 'decrement'){
+        if(idx === -1){ /* nothing */ }
+        else { cart[idx].qty = (cart[idx].qty || 0) - 1; if(cart[idx].qty <= 0) cart.splice(idx,1); }
+      }
+
+      saveCart(cart);
+      updateCartCount();
+      updateCardQuantities();
+    }
+
+    if(e.target && e.target.classList && e.target.classList.contains('add-now')){
+      const card = e.target.closest('.item');
+      const name = card.getAttribute('data-name') || card.querySelector('h3').textContent;
+      const price = Number(card.getAttribute('data-price') || 0);
+      const img = (card.querySelector('img') && card.querySelector('img').getAttribute('src')) || '';
+      const desc = (card.querySelector('p') && card.querySelector('p').textContent) || '';
+      const cart = getCart();
+      const idx = findIndex(cart, name);
+      if(idx === -1) cart.push({ name, price, qty: 1, img, desc }); else cart[idx].qty = (cart[idx].qty || 0) + 1;
+      saveCart(cart);
+      updateCartCount();
+      updateCardQuantities();
+    }
+
+    if(e.target && e.target.id === 'cartLink'){
+      e.preventDefault();
+      const cart = getCart();
+      if(!cart.length) return alert('Cart is empty');
+      window.location.href = 'cart.html';
+    }
+  });
+
+  // init
+  updateCartCount();
+  updateCardQuantities();
+</script>
+
+</body>
+</html>

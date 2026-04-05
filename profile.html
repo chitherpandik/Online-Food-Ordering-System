@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>User Profile</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body{font-family:Arial,Helvetica,sans-serif;background-color:#f5f5f7;margin:0;/* page background image - place your image at project root as profilebg.jpg */background-image:url('profilebg.jpg');background-size:cover;background-position:center;background-repeat:no-repeat}
+    /* translucent card to keep content readable over the background */
+    .wrap{max-width:820px;margin:28px auto;padding:20px;background:rgba(255,255,255,0.92);backdrop-filter:blur(4px);border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,0.08)}
+    h1{color:#ff5722;margin:0 0 12px}
+    .row{display:flex;gap:14px;align-items:center}
+    .field{margin:12px 0}
+    .label{color:#666;font-size:13px}
+    .value{font-weight:700;color:#222}
+    .actions{display:flex;gap:10px;margin-top:18px}
+    .btn{padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
+    .btn-primary{background:#ff5722;color:#fff}
+    .btn-secondary{background:#eee}
+    .section{margin-top:18px;padding:12px;border-radius:8px;background:#fafafa}
+    /* Orders styling */
+    .order-card{border:1px solid #eee;border-radius:8px;padding:12px;margin-bottom:12px;background:#fff}
+    .order-header{display:flex;justify-content:space-between;align-items:center;gap:12px}
+    .order-meta{color:#666;font-size:13px}
+    .order-total{display:flex;flex-direction:column;align-items:flex-end;min-width:140px}
+    .pm-badge{display:inline-block;padding:6px 8px;border-radius:16px;background:#fff6f1;color:#ff5722;border:1px solid #ffdcd0;font-weight:700;font-size:12px}
+    .order-date{font-weight:700;color:#333}
+    .order-id{color:#999;font-size:13px}
+    .order-items{margin-top:8px;border-top:1px solid #f2f2f2;padding-top:8px}
+    .order-item{display:grid;grid-template-columns:1fr 60px 80px;gap:8px;padding:6px 0;align-items:center;border-bottom:1px solid #f7f7f7}
+    .order-item:last-child{border-bottom:none}
+    .order-item .name{font-weight:600}
+  </style>
+</head>
+<body >
+  <div class="wrap">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h1>Profile</h1>
+      <a href="home.html" style="color:#666;text-decoration:none"><button  class="btn btn-primary">← Home</button></a>
+    </div>
+
+    <div class="section">
+      <div class="label">Name</div>
+      <div style="display:flex;align-items:center;gap:8px">
+        <div id="nameVal" class="value">—</div>
+        <input id="nameInput" style="display:none;padding:6px;border-radius:6px;border:1px solid #ddd" />
+        <button id="editNameBtn" class="btn btn-secondary" style="padding:6px 8px">Edit</button>
+        <button id="saveNameBtn" class="btn btn-primary" style="display:none;padding:6px 8px">Save</button>
+        <button id="cancelNameBtn" class="btn btn-secondary" style="display:none;padding:6px 8px">Cancel</button>
+      </div>
+    
+      <div class="label">Email</div>
+      <div id="emailVal" class="value">—</div>
+    </div>
+
+    <div class="section">
+      <div style="font-weight:700;margin-bottom:8px">Saved Delivery Details</div>
+      <div class="field"><div class="label">Full name</div><div id="dName" class="value">—</div></div>
+      <div class="field"><div class="label">Phone</div><div id="dPhone" class="value">—</div></div>
+      <div class="field"><div class="label">Address</div><div id="dAddress" class="value">—</div></div>
+      <div class="actions">
+        <button id="editDelivery" class="btn btn-primary">Edit Delivery</button>
+        <button id="clearDelivery" class="btn btn-secondary">Clear Saved Delivery</button>
+      </div>
+    </div>
+
+    <div class="section" id="ordersSection" style="margin-top:18px">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-weight:700;margin-bottom:8px">Order History</div>
+        <div><button id="viewOrders" class="btn btn-primary">View Orders</button></div>
+      </div>
+      <div id="ordersList" style="display:none"></div>
+    </div>
+
+    <div class="section" style="margin-top:16px">
+      <div style="font-weight:700;margin-bottom:8px">Account</div>
+      <div class="actions">
+        <button id="logoutBtn" class="btn btn-primary">Logout</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function init(){
+      const name = sessionStorage.getItem('userFullName') || sessionStorage.getItem('userEmail') || 'Guest User';
+      const email = sessionStorage.getItem('userEmail') || '';
+      document.getElementById('nameVal').textContent = name;
+      document.getElementById('emailVal').textContent = email || 'Not signed in';
+
+        // load saved delivery from localStorage, prefer logged-in user's fullname
+        try{
+          const raw = localStorage.getItem('deliveryInfo');
+          const storedName = sessionStorage.getItem('userFullName') || '';
+          if(raw){
+            const d = JSON.parse(raw);
+            // show userFullName if available otherwise saved delivery name
+            document.getElementById('dName').textContent = storedName || d.name || '—';
+            document.getElementById('dPhone').textContent = d.phone || '—';
+            document.getElementById('dAddress').textContent = d.address || '—';
+          } else {
+            document.getElementById('dName').textContent = storedName || '—';
+          }
+        }catch(e){ /* ignore */ }
+
+      document.getElementById('editDelivery').addEventListener('click', ()=>{ window.location.href = 'payment.html'; });
+      document.getElementById('clearDelivery').addEventListener('click', ()=>{
+        if(!confirm('Clear saved delivery details?')) return;
+        localStorage.removeItem('deliveryInfo');
+        document.getElementById('dName').textContent = '—';
+        document.getElementById('dPhone').textContent = '—';
+        document.getElementById('dAddress').textContent = '—';
+        alert('Saved delivery details cleared');
+      });
+
+      document.getElementById('logoutBtn').addEventListener('click', ()=>{
+        sessionStorage.removeItem('loggedIn');
+        sessionStorage.removeItem('userEmail');
+        sessionStorage.removeItem('userFullName');
+        alert('Logged out');
+        window.location.href = 'home.html';
+      });
+
+      // view orders toggle: button now lives in the orders header
+      const viewBtn = document.getElementById('viewOrders');
+      let ordersLoaded = false;
+      viewBtn.addEventListener('click', async ()=>{
+        const cont = document.getElementById('ordersList');
+        if(cont.style.display === 'none'){
+          cont.style.display = '';
+          if(!ordersLoaded){ await loadOrders(); ordersLoaded = true; }
+        } else {
+          cont.style.display = 'none';
+        }
+      });
+      
+      // name edit handlers
+      const editBtn = document.getElementById('editNameBtn');
+      const saveBtn = document.getElementById('saveNameBtn');
+      const cancelBtn = document.getElementById('cancelNameBtn');
+      const nameVal = document.getElementById('nameVal');
+      const nameInput = document.getElementById('nameInput');
+      function enterEdit(){
+        nameInput.value = nameVal.textContent === '—' ? '' : nameVal.textContent;
+        nameVal.style.display = 'none';
+        nameInput.style.display = 'inline-block';
+        editBtn.style.display = 'none';
+        saveBtn.style.display = '';
+        cancelBtn.style.display = '';
+        nameInput.focus();
+      }
+      function exitEdit(){
+        nameVal.style.display = '';
+        nameInput.style.display = 'none';
+        editBtn.style.display = '';
+        saveBtn.style.display = 'none';
+        cancelBtn.style.display = 'none';
+      }
+      editBtn.addEventListener('click', enterEdit);
+      cancelBtn.addEventListener('click', exitEdit);
+      saveBtn.addEventListener('click', async ()=>{
+        const newName = nameInput.value.trim();
+        if(!newName) return alert('Please enter a name');
+        const email = sessionStorage.getItem('userEmail') || '';
+        if(!email) return alert('Not signed in');
+        saveBtn.disabled = true;
+        try{
+          const resp = await fetch('/api/profile', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ email, fullname: newName }) });
+          const data = await resp.json().catch(()=>null);
+          if(resp.ok && data && data.success){
+            sessionStorage.setItem('userFullName', newName);
+            nameVal.textContent = newName;
+            alert('Name updated');
+            exitEdit();
+            loadOrders();
+          } else {
+            console.error('profile update failed', resp.status, data);
+            alert('Unable to update name: ' + ((data && data.error) ? data.error : resp.status));
+          }
+        }catch(err){
+          console.error('profile update error', err);
+          alert('Network error updating name');
+        }finally{ saveBtn.disabled = false; }
+      });
+
+      // load orders
+      async function loadOrders(){
+        const email = sessionStorage.getItem('userEmail') || '';
+        const cont = document.getElementById('ordersList');
+        if(!email){ cont.innerHTML = '<div>Please sign in to view orders.</div>'; return; }
+        cont.innerHTML = 'Loading…';
+        try{
+          const url = '/api/orders?email=' + encodeURIComponent(email);
+          const resp = await fetch(url);
+          const data = await resp.json().catch(()=>null);
+          if(!resp.ok || !data || !data.success){
+            cont.innerHTML = '<div>Unable to load orders.</div>';
+            console.error('orders load failed', resp.status, data);
+            return;
+          }
+          if(!data.orders || !data.orders.length){ cont.innerHTML = '<div>No orders yet.</div>'; return; }
+          const html = [];
+          data.orders.forEach(entry => {
+            const o = entry.order;
+            const items = entry.items || [];
+            let itemsHtml = items.map(it => `
+              <div class="order-item">
+                <div class="name">${it.name}</div>
+                <div class="qty">${it.qty}</div>
+                <div class="price">₹${it.price}</div>
+              </div>
+            `).join('');
+            html.push(`
+              <div class="order-card">
+                <div class="order-header">
+                  <div>
+                    <div class="order-date">${new Date(o.created_at).toLocaleString()}</div>
+                    <div class="order-id">ID: ${o.id}</div>
+                  </div>
+                  <div class="order-total">
+                    <div style="font-weight:800;font-size:16px">₹${o.total}</div>
+                    <div style="margin-top:6px"><span class="pm-badge">${o.payment_method || '—'}</span></div>
+                  </div>
+                </div>
+                <div class="order-items" style="margin-top:10px">
+                  <div style="display:grid;grid-template-columns:1fr 60px 80px;font-weight:700;color:#444;padding:6px 0;border-bottom:1px solid #eee">
+                    <div>Item</div><div style="text-align:center">Qty</div><div style="text-align:right">Price</div>
+                  </div>
+                  ${itemsHtml}
+                </div>
+              </div>
+            `);
+          });
+          cont.innerHTML = html.join('');
+        }catch(err){
+          cont.innerHTML = '<div>Error loading orders.</div>';
+          console.error('loadOrders error', err);
+        }
+      }
+      // orders are hidden initially; load only when user clicks "View Orders"
+    }
+    init();
+  </script>
+</body>
+</html>

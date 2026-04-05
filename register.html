@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register</title>
+    <style>
+        body {
+            font-family: Arial;
+            background: url("bg.jpg") no-repeat center center fixed;
+            background-size: cover;
+        }
+        .box {
+            width: 320px;
+            margin: 80px auto;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            box-shadow: 0 0 10px black;
+        }
+        h2 {
+            text-align: center;
+            color: #ff5722;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin: 8px 0;
+        }
+        button {
+            width: 100%;
+            padding: 8px;
+            background: #ff5722;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        a {
+            color: #ff5722;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h2>Register</h2>
+    <form id="registerForm">
+        <input id="fullname" name="fullname" type="text" placeholder="Full Name" required>
+        <input id="email" name="email" type="email" placeholder="Email" required>
+        <input id="password" name="password" type="password" placeholder="Password" required>
+        <input id="confirmPassword" type="password" placeholder="Confirm Password" required>
+        <button type="submit">Register</button>
+    </form>
+    <p style="text-align:center;">
+        Already have account? <a href="login.html">Login</a>
+    </p>
+</div>
+
+<script>
+document.getElementById('registerForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    const fullname = document.getElementById('fullname').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+    const confirmPassword = document.getElementById('confirmPassword').value;
+    if(!fullname || !email || !password){
+        alert('Please fill all fields.');
+        return;
+    }
+    if(password !== confirmPassword){
+        alert('Passwords do not match.');
+        return;
+    }
+    try{
+        // If page opened via file://, location.protocol === 'file:' and location.origin === 'null'
+        // Use absolute server URL so the POST reaches the running Express server.
+        const apiUrl = window.location.protocol === 'file:' ? 'http://localhost:3000/api/register' : '/api/register';
+        const resp = await fetch(apiUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fullname, email, password })
+        });
+
+        let data = null;
+        try{
+            data = await resp.json();
+        }catch(parseErr){
+            // server returned non-JSON (or connection dropped). Try to read text for diagnostic.
+            try{ data = { error: await resp.text() } }catch(e){ data = { error: 'Server returned non-JSON response' }; }
+        }
+
+        if(resp.ok){
+            // Inform user to verify email instead of auto-login
+            const msg = (data && data.message) ? data.message : 'Registration successful. Please check your email for a verification link before logging in.';
+            if(data && data.verifyUrl){
+                // show the verification link to the user (helpful in local/dev without SMTP)
+                const ok = confirm(msg + "\n\nServer provided a verification link. Click OK to open it now, or Cancel to go to login.");
+                if(ok){
+                    window.open(data.verifyUrl, '_blank');
+                    return;
+                }
+            } else {
+                alert(msg);
+            }
+            // Redirect to login page
+            window.location.href = 'login.html';
+        } else {
+            const errMsg = (data && (data.error || data.message)) ? (data.error || data.message) : 'Registration failed (server returned ' + resp.status + ')';
+            alert(errMsg);
+        }
+    } catch(err){
+        console.error('Register fetch error:', err);
+        alert('Network or server error: ' + (err && err.message ? err.message : String(err)));
+    }
+});
+</script>
+
+</body>
+</html>

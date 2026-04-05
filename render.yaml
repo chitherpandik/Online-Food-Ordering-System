@@ -1,0 +1,17 @@
+services:
+  - type: web
+    name: project-backend
+    env: node
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: PORT
+        value: 3000
+      - key: APP_HOST
+        sync: false
+      - key: SHOW_VERIFY_LINK
+        value: "true"

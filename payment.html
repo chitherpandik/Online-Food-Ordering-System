@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Payment</title>
+  <style>
+    body{font-family:Arial, Helvetica, sans-serif;background:#f5f5f7;/* page background image - if profilebg.jpg exists in project root it will be used */background-image:url('profilebg.jpg');background-size:cover;background-position:center;background-repeat:no-repeat}
+    .wrap{max-width:900px;margin:28px auto;padding:20px;background:#fff;border-radius:10px}
+    h1{color:#ff5722;margin:0 0 12px}
+    .items{margin-bottom:16px}
+    .item{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #eee}
+    .summary{display:flex;justify-content:space-between;align-items:center;margin-top:12px}
+    .muted{color:#666;font-size:14px}
+    .methods{display:flex;gap:8px;margin-top:8px}
+    .method{display:inline-block;padding:8px 12px;border-radius:8px;border:1px solid #eee;cursor:pointer;background:#fff;color:#666}
+    .method.active{background:#ffefd9;color:#ff5722;border-color:#ffd7b8}
+    .section{margin-top:16px}
+    .field{display:flex;flex-direction:column;margin-bottom:10px}
+    input{padding:8px;border-radius:6px;border:1px solid #ddd}
+    .pay-btn{background:#ff5722;color:#fff;border:none;padding:10px 14px;border-radius:8px;cursor:pointer;font-weight:700}
+    .actions{display:flex;justify-content:flex-end;gap:10px;margin-top:12px}
+    .btn{padding:8px 12px;border-radius:8px;border:none;cursor:pointer}
+    .btn-secondary{background:#eee}
+    .qr-card{display:flex;gap:16px;align-items:center;padding:12px;border:1px solid #f0f0f0;border-radius:8px;background:#fff;margin-top:12px}
+    .qr-card img{width:180px;height:180px;object-fit:contain;border-radius:8px}
+    .copy-btn{margin-top:8px;padding:8px 10px;border-radius:6px;border:none;background:#f2f2f2;cursor:pointer}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <h1>Payment</h1>
+      <a class="muted" href="cart.html">← Back to cart</a>
+    </div>
+
+    <div id="orderDetails">
+      <div class="muted">Loading order…</div>
+    </div>
+
+    <div class="section">
+      <h3>Delivery Details</h3>
+      <div style="margin-top:8px">
+        <div class="field"><label>Phone</label><input id="deliveryPhone" placeholder="Phone number"></div>
+        <div class="field"><label>Address</label><textarea id="deliveryAddress" placeholder="Delivery address" style="min-height:80px;padding:8px;border-radius:6px;border:1px solid #ddd"></textarea></div>
+        <div style="display:flex;justify-content:flex-end;gap:8px;margin-top:6px">
+          <button id="saveDeliveryBtn" class="btn">Save</button>
+          <button id="resetDeliveryBtn" class="btn btn-secondary">Reset</button>
+        </div>
+      </div>
+  
+
+    <div class="section">
+      <div class="muted">Payment method</div>
+      <div id="methods" class="methods"></div>
+    </div>
+
+    <!-- Card form -->
+    <div id="cardSection" class="section" style="display:none">
+      <h3>Enter payment details</h3>
+      <div class="field"><label>Cardholder name</label><input id="cardName" placeholder="Full name"></div>
+      <div class="field"><label>Card number</label><input id="cardNumber" placeholder="4111 1111 1111 1111"></div>
+      <div style="display:flex;gap:8px">
+        <div style="flex:1" class="field"><label>Expiry</label><input id="expiry" placeholder="MM/YY"></div>
+        <div style="width:120px" class="field"><label>CVV</label><input id="cvv" placeholder="123"></div>
+      </div>
+      <div style="display:flex;justify-content:flex-end;margin-top:6px">
+        <button id="payCardBtn" class="pay-btn">Pay Now</button>
+      </div>
+    </div>
+
+    <!-- UPI / QR -->
+    <div id="upiSection" class="section" style="display:none">
+      <div class="qr-card">
+        <img id="upiImg" src="GooglePay.jpg" alt="UPI QR">
+        <div>
+          <div style="font-weight:700">Pay via UPI</div>
+          <div style="margin-top:6px;color:#444">Scan this QR code with any UPI app or copy the UPI ID below.</div>
+          <div style="margin-top:12px;display:flex;align-items:center;gap:8px">
+            <div id="upiId" style="font-weight:800;color:#222">chitherpandik@okhdfcbank</div>
+            <button id="copyUpi" class="copy-btn">Copy</button>
+          </div>
+          <div style="margin-top:8px;color:#666;font-size:13px">If you used the QR, tap "I Paid" after completing payment.</div>
+        </div>
+      </div>
+      <div style="margin-top:10px;display:flex;justify-content:flex-end;gap:8px">
+        <button id="upiPaidBtn" class="btn pay-btn">I Paid (UPI)</button>
+      </div>
+    </div>
+
+    <!-- QR Scanner -->
+    <div id="qrSection" class="section" style="display:none">
+      <h4>Scan QR to pay</h4>
+      <div style="display:flex;gap:8px;align-items:center">
+        <button id="startScanBtn" class="btn btn-secondary">Start QR Scanner</button>
+        <button id="stopScanBtn" class="btn btn-secondary" style="display:none">Stop Scanner</button>
+      </div>
+      <div id="qr-reader" style="width:320px;margin-top:12px"></div>
+      <div style="margin-top:8px">Scanned amount: <strong id="scannedAmount">—</strong></div>
+      <div style="margin-top:8px;color:#666;font-size:13px">QR may contain a number (e.g., "250"), JSON {"amount":250}, or query string like "amount=250".</div>
+      <div style="margin-top:8px;display:flex;justify-content:flex-end">
+        <button id="payScannedBtn" class="pay-btn" disabled>Pay Scanned Amount</button>
+      </div>
+    </div>
+
+    <!-- Cash on Delivery -->
+    <div id="codSection" class="section" style="display:none">
+      <h4>Cash on Delivery</h4>
+      <div style="color:#444;margin-top:6px">You will pay in cash when the delivery arrives.</div>
+      <div style="display:flex;justify-content:flex-end;margin-top:12px">
+        <button id="placeCodBtn" class="pay-btn">Place Order (Cash on Delivery)</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
+  <script>
+    function getCart(){ try{ return JSON.parse(localStorage.getItem('cart')||'[]') }catch(e){ return [] } }
+    function clearCart(){ localStorage.removeItem('cart') }
+
+    const methods = ['Card','UPI','Cash on Delivery'];
+    let selectedMethod = 'Card';
+
+    function renderOrder(){
+      const container = document.getElementById('orderDetails');
+      const cart = getCart();
+      if(!cart || !cart.length){ container.innerHTML = '<div class="muted">Your cart is empty. <a href="night.html">Go to menu</a></div>'; hideAllSections(); return; }
+      let html = '<div class="items">';
+      cart.forEach((it,i)=>{ html += `<div class="item"><div>${i+1}. ${it.name} x${it.qty}</div><div>₹${(Number(it.price)||0)*(Number(it.qty)||0)}</div></div>` });
+      html += '</div>';
+      const total = cart.reduce((s,it)=> s + (Number(it.price)||0)*(Number(it.qty)||0), 0);
+      html += `<div class="summary"><div><strong>Total</strong></div><div><strong>₹${total}</strong></div></div>`;
+      container.innerHTML = html;
+      renderMethods();
+      updateSections();
+    }
+
+    function renderMethods(){
+      const mcont = document.getElementById('methods');
+      mcont.innerHTML = '';
+      methods.forEach(m => {
+        const el = document.createElement('div');
+        el.className = 'method' + (m === selectedMethod ? ' active' : '');
+        el.textContent = m;
+        el.addEventListener('click', ()=>{ selectedMethod = m; renderMethods(); updateSections(); });
+        mcont.appendChild(el);
+      });
+    }
+
+    function hideAllSections(){
+      document.getElementById('cardSection').style.display = 'none';
+      document.getElementById('upiSection').style.display = 'none';
+      document.getElementById('qrSection').style.display = 'none';
+      document.getElementById('codSection').style.display = 'none';
+    }
+
+    function updateSections(){
+      hideAllSections();
+      if(selectedMethod === 'Card'){
+        document.getElementById('cardSection').style.display = 'block';
+      } else if(selectedMethod === 'UPI'){
+        document.getElementById('upiSection').style.display = 'block';
+        document.getElementById('qrSection').style.display = 'block';
+      } else if(selectedMethod === 'Cash on Delivery'){
+        document.getElementById('codSection').style.display = 'block';
+      }
+    }
+
+    function showThankYouAndRedirect(message, delay){
+      delay = typeof delay === 'number' ? delay : 1600;
+      // overlay
+      const ov = document.createElement('div');
+      ov.style.position = 'fixed'; ov.style.inset = '0'; ov.style.display = 'flex'; ov.style.alignItems = 'center'; ov.style.justifyContent = 'center';
+      ov.style.background = 'rgba(0,0,0,0.4)'; ov.style.zIndex = '9999';
+      const card = document.createElement('div');
+      card.style.background = '#fff'; card.style.padding = '22px'; card.style.borderRadius = '10px'; card.style.textAlign = 'center'; card.style.maxWidth = '520px'; card.style.width = '90%';
+      const h = document.createElement('div'); h.style.fontSize = '20px'; h.style.fontWeight = '700'; h.style.color = '#ff5722'; h.textContent = 'Thank you!';
+      const p = document.createElement('div'); p.style.marginTop = '8px'; p.style.color = '#333'; p.textContent = message || '';
+      card.appendChild(h); card.appendChild(p); ov.appendChild(card);
+      document.body.appendChild(ov);
+      setTimeout(function(){ window.location.href = 'home.html'; }, delay);
+    }
+
+    // Card payment handler
+    document.addEventListener('click', function(e){
+      if(e.target && e.target.id === 'payCardBtn'){
+        const name = document.getElementById('cardName').value.trim();
+        const number = document.getElementById('cardNumber').value.replace(/\s+/g,'');
+        const expiry = document.getElementById('expiry').value.trim();
+        const cvv = document.getElementById('cvv').value.trim();
+        if(!name || number.length < 12 || !expiry || cvv.length < 3){ alert('Please enter valid card details'); return; }
+        const total = getCart().reduce((s,it)=> s + (Number(it.price)||0)*(Number(it.qty)||0), 0);
+        // send order to server, then clear cart and thank user
+        sendOrderToServer(total, 'Card').then(ok => {
+          if(ok){ clearCart(); showThankYouAndRedirect('Payment successful — thank you! Total: ₹' + total); }
+          else { alert('Payment succeeded but saving order failed.'); }
+        }).catch(()=>{ alert('Network error saving order'); });
+      }
+    });
+
+    // UPI copy and I Paid
+    document.addEventListener('click', function(e){
+      if(e.target && e.target.id === 'copyUpi'){
+        const upi = document.getElementById('upiId').textContent.trim();
+        if(navigator.clipboard){ navigator.clipboard.writeText(upi).then(()=> alert('UPI ID copied')) }
+        else { prompt('Copy UPI ID', upi) }
+      }
+      if(e.target && e.target.id === 'upiPaidBtn'){
+        const cart = getCart();
+        if(!cart || !cart.length) return alert('No items in cart');
+        if(!confirm('Have you completed payment via UPI?')) return;
+        const total = cart.reduce((s,it)=> s + (Number(it.price)||0)*(Number(it.qty)||0), 0);
+        sendOrderToServer(total, 'UPI').then(ok => {
+          if(ok){ clearCart(); showThankYouAndRedirect('Payment confirmed — thank you!'); }
+          else { alert('Payment succeeded but saving order failed.'); }
+        }).catch(()=> alert('Network error saving order'));
+      }
+      if(e.target && e.target.id === 'placeCodBtn'){
+        const cart = getCart();
+        if(!cart || !cart.length) return alert('No items in cart');
+        if(!confirm('Place order with Cash on Delivery?')) return;
+        const total = cart.reduce((s,it)=> s + (Number(it.price)||0)*(Number(it.qty)||0), 0);
+        sendOrderToServer(total, 'Cash on Delivery').then(ok => {
+          if(ok){ clearCart(); showThankYouAndRedirect('Order placed — pay on delivery. Thank you!'); }
+          else { alert('Order placed but saving failed.'); }
+        }).catch(()=> alert('Network error saving order'));
+      }
+    });
+
+    // QR scanner logic
+    let html5QrcodeScanner = null;
+    function parseAmountFromString(s){
+      if(!s) return null; s = s.trim();
+      try{ const j = JSON.parse(s); if(j && (j.amount||j.amt||j.pay)) return Number(j.amount||j.amt||j.pay); }catch(e){}
+      try{ const u = new URL('http://x/?'+s); const a = u.searchParams.get('amount'); if(a) return Number(a); }catch(e){}
+      const m = s.match(/amount=(\d+(?:\.\d+)?)/i); if(m) return Number(m[1]);
+      const n = s.match(/(\d+(?:\.\d+)?)/); if(n) return Number(n[1]);
+      return null;
+    }
+
+    document.getElementById('startScanBtn').addEventListener('click', startScanner);
+    document.getElementById('stopScanBtn').addEventListener('click', stopScanner);
+    document.getElementById('payScannedBtn').addEventListener('click', function(){
+      const amtTxt = document.getElementById('scannedAmount').textContent.replace(/[^0-9.]/g,'');
+      const amt = Number(amtTxt);
+      const total = getCart().reduce((s,it)=> s + (Number(it.price)||0)*(Number(it.qty)||0), 0);
+      if(amt !== Number(total)) return alert('Scanned amount does not match total. Please scan the correct QR.');
+      if(!confirm('Confirm payment of ₹'+amt+'?')) return;
+      sendOrderToServer(total, 'QR').then(ok => {
+        if(ok){ clearCart(); stopScanner(); showThankYouAndRedirect('Payment confirmed — thank you!'); }
+        else { alert('Payment succeeded but saving order failed.'); }
+      }).catch(()=> alert('Network error saving order'));
+    });
+
+    async function sendOrderToServer(total, paymentMethod){
+      const cart = getCart();
+      const nameEl = document.getElementById('deliveryName');
+      const fullnameVal = (nameEl && nameEl.value) ? nameEl.value.trim() : (sessionStorage.getItem('userFullName')||'');
+      const payload = {
+        email: sessionStorage.getItem('userEmail') || '',
+        fullname: fullnameVal,
+        total: Number(total) || 0,
+        paymentMethod: paymentMethod,
+        address: document.getElementById('deliveryAddress').value.trim() || null,
+        phone: document.getElementById('deliveryPhone').value.trim() || null,
+        items: cart.map(i => ({ name: i.name, price: i.price, qty: i.qty, img: i.img || null, desc: i.desc || null }))
+      };
+      // basic validation
+      if(!payload.address){ alert('Please enter delivery address'); return false; }
+      if(!payload.phone){ alert('Please enter phone number'); return false; }
+      try{
+        const resp = await fetch('/api/orders', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        const data = await resp.json();
+        return resp.ok && data && data.success;
+      }catch(err){ console.error('sendOrderToServer', err); return false; }
+    }
+
+    function startScanner(){
+      const readerId = 'qr-reader';
+      document.getElementById('startScanBtn').style.display = 'none';
+      document.getElementById('stopScanBtn').style.display = 'inline-block';
+      if(html5QrcodeScanner) return;
+      html5QrcodeScanner = new Html5Qrcode(readerId);
+      const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+      Html5Qrcode.getCameras().then(cameras => {
+        const camId = (cameras && cameras[0] && cameras[0].id) || { facingMode: 'environment' };
+        html5QrcodeScanner.start(camId, config, (decodedText, decodedResult)=>{
+          const amt = parseAmountFromString(decodedText);
+          const span = document.getElementById('scannedAmount');
+          if(amt!=null && !isNaN(amt)){
+            span.textContent = '₹'+amt;
+            const total = getCart().reduce((s,it)=> s + (Number(it.price)||0)*(Number(it.qty)||0), 0);
+            if(Number(total) === Number(amt)) document.getElementById('payScannedBtn').disabled = false;
+            else document.getElementById('payScannedBtn').disabled = true;
+          } else {
+            span.textContent = 'Unrecognized';
+            document.getElementById('payScannedBtn').disabled = true;
+          }
+        }, (errorMessage) => {
+          // ignore
+        }).catch(err=>{
+          alert('Unable to start camera for QR scanning: '+err);
+          document.getElementById('startScanBtn').style.display = 'inline-block';
+          document.getElementById('stopScanBtn').style.display = 'none';
+        });
+      }).catch(err=>{
+        alert('Unable to access camera: '+err);
+        document.getElementById('startScanBtn').style.display = 'inline-block';
+        document.getElementById('stopScanBtn').style.display = 'none';
+      });
+    }
+
+    function stopScanner(){
+      document.getElementById('stopScanBtn').style.display = 'none';
+      document.getElementById('startScanBtn').style.display = 'inline-block';
+      if(!html5QrcodeScanner) return;
+      html5QrcodeScanner.stop().then(()=>{ html5QrcodeScanner.clear(); html5QrcodeScanner = null; }).catch(()=>{ html5QrcodeScanner = null; });
+    }
+
+    // Delivery info persistence
+    function loadDeliveryInfo(){
+      try{
+        const raw = localStorage.getItem('deliveryInfo');
+        if(!raw) return;
+        const o = JSON.parse(raw);
+        if(o.name && document.getElementById('deliveryName')) document.getElementById('deliveryName').value = o.name;
+        if(o.phone && document.getElementById('deliveryPhone')) document.getElementById('deliveryPhone').value = o.phone;
+        if(o.address && document.getElementById('deliveryAddress')) document.getElementById('deliveryAddress').value = o.address;
+      }catch(e){/* ignore */}
+    }
+    async function saveDeliveryInfo(){
+      const btn = document.getElementById('saveDeliveryBtn');
+      if(btn) btn.disabled = true;
+      const o = {
+        name: (document.getElementById('deliveryName') ? document.getElementById('deliveryName').value : '').trim(),
+        phone: (document.getElementById('deliveryPhone') ? document.getElementById('deliveryPhone').value : '').trim(),
+        address: (document.getElementById('deliveryAddress') ? document.getElementById('deliveryAddress').value : '').trim()
+      };
+      // Phone number validation: must be exactly 10 digits
+      if (!/^\d{10}$/.test(o.phone)) {
+        alert('Phone number must be exactly 10 digits.');
+        if(btn) btn.disabled = false;
+        return false;
+      }
+      // try save to server; fall back to localStorage
+      try{
+        const payload = { email: sessionStorage.getItem('userEmail') || '', fullname: o.name || sessionStorage.getItem('userFullName') || '', address: o.address, phone: o.phone };
+          const resp = await fetch('/api/delivery', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+          let data = null;
+          try{ data = await resp.json(); }catch(e){ data = null; }
+          // always persist locally as well
+          localStorage.setItem('deliveryInfo', JSON.stringify(o));
+          if(resp.ok && data && data.success){
+            alert('Delivery details saved to server');
+            return true;
+          } else {
+            console.error('delivery save failed', resp.status, data);
+            const msg = (data && data.error) ? data.error : ('Server returned ' + resp.status);
+            alert('Saved locally, but server returned an error: ' + msg);
+            return false;
+          }
+      }catch(err){
+        localStorage.setItem('deliveryInfo', JSON.stringify(o));
+          console.error('delivery save network error', err);
+          alert('Saved locally; unable to reach server: ' + (err && err.message ? err.message : String(err)));
+          return false;
+        } finally {
+          if(btn) btn.disabled = false;
+      }
+    }
+    function resetDeliveryInfo(){
+      document.getElementById('deliveryName').value = '';
+      document.getElementById('deliveryPhone').value = '';
+      document.getElementById('deliveryAddress').value = '';
+      localStorage.removeItem('deliveryInfo');
+      alert('Delivery details cleared');
+    }
+    document.getElementById('saveDeliveryBtn').addEventListener('click', function(e){ e.preventDefault(); saveDeliveryInfo(); });
+    document.getElementById('resetDeliveryBtn').addEventListener('click', function(e){ e.preventDefault(); if(confirm('Clear saved delivery details?')) resetDeliveryInfo(); });
+    // init
+    loadDeliveryInfo();
+    renderOrder();
+
+    // handle image load errors (hide broken images)
+    const upiImgEl = document.getElementById('upiImg');
+    if(upiImgEl){
+      upiImgEl.addEventListener('error', function(){ this.style.display = 'none'; });
+      upiImgEl.addEventListener('load', function(){ this.style.display = 'block'; });
+    }
+  </script>
+</body>
+</html>
