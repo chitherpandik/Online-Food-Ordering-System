@@ -45,7 +45,7 @@ app.post('/api/register', async (req, res) => {
       email: emailTrim,
       password_hash: hash,
       verification_token: token,
-      email_verified: false
+      email_verified: true
     });
     if (insertErr) throw insertErr;
 
@@ -181,7 +181,6 @@ app.post('/api/login', async (req, res) => {
       .maybeSingle();
 
     if (!user) return res.status(401).json({ error: 'Invalid credentials' });
-    if (!user.email_verified) return res.status(403).json({ error: 'Email not verified' });
 
     const match = await bcrypt.compare(password, user.password_hash);
     if (!match) return res.status(401).json({ error: 'Invalid credentials' });
